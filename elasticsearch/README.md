@@ -23,6 +23,83 @@ GET <nom de votre index>/_count
 
 ```
 TODO : ajouter les requêtes ElasticSearch ici
+
+Q1 : 
+
+GET /id/call/_search
+{
+    "query": {
+        "bool" : {
+            "must" : {
+                "match_all" : {}
+            },
+            "filter" : {
+                "geo_distance" : {
+                    "distance" : "500m",
+                    "location" : {
+                        "lat" : 40.241493,
+                        "lon" : -75.283783
+                    }
+                }
+            }
+        }
+    }
+}
+
+Q2 :
+
+GET /id/call/_search
+{
+    "size" : 0,
+    "aggs" : {
+        "categ" : {
+            "terms": { 
+                "field": "categ"
+            }
+        }
+    }
+}
+
+Q3 :
+
+GET id/call/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "calls" : {
+      "date_histogram" : {
+        "field" : "timeStamp",
+        "interval" : "month",
+        "time_zone": "Europe/Paris", 
+        "order" : { "_count" : "desc" }
+      }
+    }
+  }
+}
+
+Q4 : 
+
+GET /id/call/_search
+{
+    "size" : 0,
+    "query": {
+            "term": {
+              "event": "overdose"
+            }
+    },
+    "aggs" : {
+        "overdoses" : {
+            "terms": {
+                "field": "twp.keyword",
+                "size": 3, 
+                "order": {
+                    "_count" : "desc" 
+                }
+            }
+        }
+    }
+}
+
 ```
 
 ## Kibana

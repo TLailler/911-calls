@@ -1,40 +1,30 @@
-# 911 Calls avec MongoDB
+var mongodb = require('mongodb');
 
-## Import du jeu de données
+var MongoClient = mongodb.MongoClient;
+var mongoUrl = 'mongodb://localhost:27017/911-calls';
 
-Pour importer le jeu de données, complétez le script `import.js` (cherchez le `TODO` dans le code :wink:).
+MongoClient.connect(mongoUrl, (err, db) => {
+    
+    // TEST
+    // db.collection('calls').find().sort({"timeStamp": 1}).limit(1).toArray(function (error , result) {
+    //     if (error) throw error;
+    //     console.log(result);
+    //     db.close();
+    // });
 
-Exécutez-le ensuite :
+    // db.collection('calls').find({"title": "EMS: BACK PAINS/INJURY"}).count(function (error , result) {
+    //     if (error) throw error;
+    //     console.log(result);
+    //     db.close();
+    // });
 
-```bash
-npm install
-node import.js
-```
-
-Vérifiez que les données ont été importées correctement grâce au shell (le nombre total de documents doit être `153194`) :
-
-```
-use 911-calls
-db.calls.count()
-```
-
-## Index géographique et index textuel
-
-Afin de répondre aux différents problèmes, vous allez avoir besoin de créer deux index particuliers sur la collection des appels :
-
-* Un index géographique de type `2dsphere` pour les coordonnées GPS des appels.
-  * https://docs.mongodb.com/manual/core/2dsphere/#create-a-2dsphere-index
-* Un index textuel sur le titre des appels pour pouvoir faire des recherches full-text sur ce champ (recherche des overdoses par exemple)
-  * https://docs.mongodb.com/manual/core/index-text/#create-text-index
-
-## Requêtes
-
-À vous de jouer ! Écrivez les requêtes MongoDB permettant de résoudre les problèmes posés.
-
-```
-TODO : ajouter les requêtes MongoDB ici
-```
     // REQUETE 1 :
+    /*
+    Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
+    latitude  = 40.241493
+    longitude = -75.283783
+    Expected result = 717
+    */
     db.collection('calls').find( { loc :
         { $near :
           { $geometry :
@@ -49,6 +39,12 @@ TODO : ajouter les requêtes MongoDB ici
     });
 
     // REQUETE 2 :
+    /*
+    Compter le nombre d'appels par catégorie
+    Le résultat attendu est :
+    EMS  	 Fire 	Traffic
+    75589 	23056  	54549
+    */
     db.collection('calls').aggregate([{
         $group : {
             _id : "$category",
@@ -62,6 +58,12 @@ TODO : ajouter les requêtes MongoDB ici
     });
 
     // REQUETE 3 :
+    /*
+    Trouver les 3 mois ayant comptabilisés le plus d'appels
+    Le résultat attendu est :
+    01/2016  	 10/2016 	12/2016
+    13096 	     12502   	12162
+    */
     db.collection('calls').aggregate([
         {
             $group : {
@@ -85,6 +87,12 @@ TODO : ajouter les requêtes MongoDB ici
     });
 
     // REQUETE 4 :
+    /*
+    Trouver le top 3 des villes avec le plus d'appels pour overdose
+    Le résultat attendu est :
+    POTTSTOWN 	 NORRISTOWN 	UPPER MORELAND
+    203 	        180  	        110
+    */
     db.collection('calls').aggregate([
         { 
             $match: { 
@@ -111,11 +119,4 @@ TODO : ajouter les requêtes MongoDB ici
         console.log(result);
         db.close();
     });
-```
-
-Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
-
-* Proximity search : https://docs.mongodb.com/manual/tutorial/query-a-2dsphere-index/#proximity-to-a-geojson-point
-* Text search : https://docs.mongodb.com/manual/text-search/#text-operator
-* Aggregation Pipeline : https://docs.mongodb.com/manual/core/aggregation-pipeline/
-* Aggregation Operators : https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/
+});

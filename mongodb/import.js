@@ -13,12 +13,15 @@ var insertCalls = function(db, callback) {
         .pipe(csv())
         .on('data', data => {
             var call = {
-                lat : data.lat,
-                lng : data.lng,
+                loc : {
+                    type : "Point",
+                    coordinates : [parseFloat(data.lng), parseFloat(data.lat)]
+                },
                 desc : data.desc,
                 zip : data.zip,
-                title : data.title,
-                timeStamp : data.timeStamp,
+                category : data.title.split(":")[0].trim(),
+                motif : data.title.split(":")[1].trim(),
+                date : new Date(data.timeStamp),
                 twp : data.twp,
                 addr : data.addr
             }; // TODO créer l'objet call à partir de la ligne
@@ -32,6 +35,11 @@ var insertCalls = function(db, callback) {
 }
 
 MongoClient.connect(mongoUrl, (err, db) => {
+    // db.collection("calls").remove();
+
+    db.collection("calls").createIndex( { loc : "2dsphere" } );
+    db.collection("calls").createIndex( { category: "text", motif: "text"} );
+
     insertCalls(db, result => {
         console.log(`${result.insertedCount} calls inserted`);
         db.close();

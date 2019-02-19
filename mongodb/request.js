@@ -5,19 +5,6 @@ var mongoUrl = 'mongodb://localhost:27017/911-calls';
 
 MongoClient.connect(mongoUrl, (err, db) => {
     
-    // TEST
-    // db.collection('calls').find().sort({"timeStamp": 1}).limit(1).toArray(function (error , result) {
-    //     if (error) throw error;
-    //     console.log(result);
-    //     db.close();
-    // });
-
-    // db.collection('calls').find({"title": "EMS: BACK PAINS/INJURY"}).count(function (error , result) {
-    //     if (error) throw error;
-    //     console.log(result);
-    //     db.close();
-    // });
-
     // REQUETE 1 :
     /*
     Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
